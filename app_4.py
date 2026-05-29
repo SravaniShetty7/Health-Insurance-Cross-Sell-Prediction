@@ -50,7 +50,7 @@ st.markdown("""
         margin-top: 4px;
     }
 </style>
-""", unsafe_allow_html=True)
+
 
 # -------------------------------------------------------------
 # PIPELINE DATA INFRASTRUCTURE LOAD
@@ -59,7 +59,7 @@ st.markdown("""
 def load_production_pipeline():
     try:
         # Load unified preprocessing objects & finalized model architecture
-        payload = joblib.load('model_ins2_prod_files.pkl')
+        payload = joblib.load('model_ins3_prod_files.pkl')
         return payload
     except FileNotFoundError:
         return None
