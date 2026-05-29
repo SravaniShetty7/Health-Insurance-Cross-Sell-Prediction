@@ -73,8 +73,8 @@ if pipeline is None:
 
 # Deconstruct serialized payload
 model = pipeline['model']
-OHE = pipeline['cat_encode']
-Scaler = pipeline['num_encode']
+OHE = pipeline['OHE']
+Scaler = pipeline['Scaler']
 model_cols = pipeline['model_columns']
 
 # -------------------------------------------------------------
