@@ -41,7 +41,7 @@ st.markdown("Predict customer intent and explore demographic behavior for optimi
 @st.cache_resource
 def load_model_pipeline():
     try:
-        artifacts = joblib.load('model_ins2_prod_files.pkl')
+        artifacts = joblib.load("model_ins3_prod_files.pkl")
         return artifacts
     except FileNotFoundError:
         return None
