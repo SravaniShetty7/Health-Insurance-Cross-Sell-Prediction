@@ -144,20 +144,40 @@ with tab_scoring:
         input_frame = pd.DataFrame(raw_payload,index=[0])
         
         try:
-            # 1. Transform Categorical variables via fitted OHE
-            cat_features = ['Gender', 'Region_Code', 'Vehicle_Age', 'Vehicle_Damage', 'Policy_Sales_Channel']
-            encoded_cats = OHE.transform(input_frame[cat_features])
-            encoded_cats_df = pd.DataFrame(encoded_cats, columns=OHE.get_feature_names_out(cat_features))
-            
-            # 2. Rescale Continuous metrics via Scaler
-            num_features = ['Age', 'Annual_Premium', 'Vintage']
-            scaled_nums = Scaler.transform(input_frame[num_features])
-            scaled_nums_df = pd.DataFrame(scaled_nums, columns=num_features)
-            
-            # 3. Join vector space structures
-            binary_df = input_frame[['Driving_License', 'Previously_Insured']].reset_index(drop=True)
-            fully_transformed_vector = pd.concat([encoded_cats_df, scaled_nums_df, binary_df], axis=1)
-            
+        # 1. Transform ONLY the columns the One-Hot Encoder expects
+        cat_features = ['Gender', 'Vehicle_Age', 'Vehicle_Damage']
+        encoded_cats = OHE.transform(input_frame[cat_features])
+        encoded_cats_df = pd.DataFrame(encoded_cats, columns=OHE.get_feature_names_out(cat_features))
+        
+        # 2. Rescale Continuous metrics via Scaler (Make sure numbers match your notebook scale)
+        num_features = ['Age', 'Region_Code', 'Annual_Premium', 'Policy_Sales_Channel', 'Vintage']
+        scaled_nums = Scaler.transform(input_frame[num_features])
+        scaled_nums_df = pd.DataFrame(scaled_nums, columns=num_features)
+        
+        # 3. Combine them back together along with the raw binary flags
+        processed_df = pd.concat([
+            scaled_nums_df, 
+            encoded_cats_df, 
+            input_frame[['Driving_License', 'Previously_Insured']].reset_index(drop=True)
+        ], axis=1)
+        
+        # 4. Reindex to force match all 218 model columns in the exact original order
+        final_model_input = processed_df.reindex(columns=model_cols, fill_value=0)
+        
+        # 5. Execute Prediction & Probabilities
+        prediction = model.predict(final_model_input)[0]
+        probability = model.predict_proba(final_model_input)[0][1]
+        
+        # 6. UI Output Presentation
+        st.markdown("---")
+        if prediction == 1:
+            st.success(f"🎉 **High Propensity!** This customer is highly likely to purchase Vehicle Insurance. (Confidence Score: {probability:.1%})")
+            st.balloons()
+        else:
+            st.warning(f"🛑 **Low Propensity.** This customer is unlikely to opt for vehicle cross-selling. (Confidence Score: {1 - probability:.1%})")
+
+    except Exception as e:
+        st.error(f"Execution Error: {str(e)}")
             # Enforce tracking dimensions matches input requirement structure
             fully_transformed_vector = fully_transformed_vector.reindex(columns=model_cols, fill_value=0.0)
             
