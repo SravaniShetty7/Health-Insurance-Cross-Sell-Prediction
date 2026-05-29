@@ -129,19 +129,19 @@ with tab_scoring:
         
         # Build vector framework matrix matching original train format
         raw_payload = {
-            'Gender': [gender],
-            'Age': [age],
-            'Driving_License': [driving_license_val],
-            'Region_Code': [region_code],
-            'Previously_Insured': [previously_insured_val],
-            'Vehicle_Age': [vehicle_age],
-            'Vehicle_Damage': [vehicle_damage],
-            'Annual_Premium': [annual_premium],
-            'Policy_Sales_Channel': [policy_sales_channel],
-            'Vintage': [vintage]
+            'Gender': gender,
+            'Age': age,
+            'Driving_License': driving_license_val,
+            'Region_Code': region_code,
+            'Previously_Insured': previously_insured_val,
+            'Vehicle_Age': vehicle_age,
+            'Vehicle_Damage': vehicle_damage,
+            'Annual_Premium': annual_premium,
+            'Policy_Sales_Channel': policy_sales_channel,
+            'Vintage': vintage
         }
         
-        input_frame = pd.DataFrame(raw_payload)
+        input_frame = pd.DataFrame(raw_payload,index=[0])
         
         try:
             # 1. Transform Categorical variables via fitted OHE
