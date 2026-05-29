@@ -133,6 +133,5 @@ with tab_scoring:
             'Gender': gender,
             'Age': age,
             'Driving_License': driving_license_val,
-    
-    
-        
+  
+  
