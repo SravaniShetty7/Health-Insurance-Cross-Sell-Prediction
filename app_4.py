@@ -50,6 +50,7 @@ st.markdown("""
         margin-top: 4px;
     }
 </style>
+""", unsafe_allow_html=True)
 
 
 # -------------------------------------------------------------
@@ -68,10 +69,10 @@ pipeline = load_production_pipeline()
 
 if pipeline is None:
     st.error("### 🛠️ Strategic Asset Missing")
-    st.info("The mandatory production core file (`model_ins2_prod_files.pkl`) was not found in the root directory. Please deploy the artifacts to initialize.")
+    st.info("The mandatory production core file (`model_ins3_prod_files.pkl`) was not found in the root directory. Please deploy the artifacts to initialize.")
     st.stop()
 
-# Deconstruct serialized payload
+# Deconstruct serialized payload with correct dictionary keys
 model = pipeline['model']
 OHE = pipeline['OHE']
 Scaler = pipeline['Scaler']
@@ -132,123 +133,6 @@ with tab_scoring:
             'Gender': gender,
             'Age': age,
             'Driving_License': driving_license_val,
-            'Region_Code': region_code,
-            'Previously_Insured': previously_insured_val,
-            'Vehicle_Age': vehicle_age,
-            'Vehicle_Damage': vehicle_damage,
-            'Annual_Premium': annual_premium,
-            'Policy_Sales_Channel': policy_sales_channel,
-            'Vintage': vintage
-        }
-        
-        input_frame = pd.DataFrame(raw_payload,index=[0])
-        
-        try:
-        # 1. Transform ONLY the columns the One-Hot Encoder expects
-        cat_features = ['Gender', 'Vehicle_Age', 'Vehicle_Damage']
-        encoded_cats = OHE.transform(input_frame[cat_features])
-        encoded_cats_df = pd.DataFrame(encoded_cats, columns=OHE.get_feature_names_out(cat_features))
-        
-        # 2. Rescale Continuous metrics via Scaler (Make sure numbers match your notebook scale)
-        num_features = ['Age', 'Region_Code', 'Annual_Premium', 'Policy_Sales_Channel', 'Vintage']
-        scaled_nums = Scaler.transform(input_frame[num_features])
-        scaled_nums_df = pd.DataFrame(scaled_nums, columns=num_features)
-        
-        # 3. Combine them back together along with the raw binary flags
-        processed_df = pd.concat([
-            scaled_nums_df, 
-            encoded_cats_df, 
-            input_frame[['Driving_License', 'Previously_Insured']].reset_index(drop=True)
-        ], axis=1)
-        
-        # 4. Reindex to force match all 218 model columns in the exact original order
-        final_model_input = processed_df.reindex(columns=model_cols, fill_value=0)
-        
-        # 5. Execute Prediction & Probabilities
-        prediction = model.predict(final_model_input)[0]
-        probability = model.predict_proba(final_model_input)[0][1]
-                # 6. UI Output Presentation
-        st.markdown("---")
-        if prediction == 1:
-            st.success(f"🎉 **High Propensity!** This customer is highly likely to purchase Vehicle Insurance. (Confidence Score: {probability:.1%})")
-            st.balloons()
-        else:
-            st.warning(f"🛑 **Low Propensity.** This customer is unlikely to opt for vehicle cross-selling. (Confidence Score: {1 - probability:.1%})")
-
-    except Exception as e:
-        st.error(f"Execution Error: {str(e)}")
-            # Enforce tracking dimensions matches input requirement structure
-            fully_transformed_vector = fully_transformed_vector.reindex(columns=model_cols, fill_value=0.0)
-            
-            # Compute operational outcome metrics
-            predicted_class = model.predict(fully_transformed_vector)[0]
-            
-            if hasattr(model, "predict_proba"):
-                prob_array = model.predict_proba(fully_transformed_vector)[0]
-                conversion_probability = prob_array[1] * 100
-            else:
-                conversion_probability = 100.0 if predicted_class == 1 else 0.0
-                
-            # DISPLAY CUSTOM SYSTEM METRICS CARDS
-            st.markdown("#### **📊 Operational Pipeline Inference Results**")
-            card_col1, card_col2 = st.columns(2)
-            
-            with card_col1:
-                class_style = "metric-value-positive" if predicted_class == 1 else "metric-value-negative"
-                class_label = "POSITIVE INTEREST (1)" if predicted_class == 1 else "NEGATIVE DESIRE (0)"
-                st.markdown(f"""
-                <div class="metric-card">
-                    <div class="metric-title">Target Classification Output</div>
-                    <div class="{class_style}">{class_label}</div>
-                    <div class="metric-subtitle">Optimized Binary Decision Output Threshold</div>
-                </div>
-                """, unsafe_allow_html=True)
-                
-            with card_col2:
-                prob_style = "metric-value-positive" if conversion_probability >= 50.0 else "metric-value-negative"
-                st.markdown(f"""
-                <div class="metric-card">
-                    <div class="metric-title">Calculated Propensity Probability</div>
-                    <div class="{prob_style}">{conversion_probability:.2f}%</div>
-                    <div class="metric-subtitle">Continuous Target Cross-Sell Score Distribution</div>
-                </div>
-                """, unsafe_allow_html=True)
-
-            # Execution Action Alert Rules
-            if predicted_class == 1:
-                st.success(f"🎯 **High-Priority Target Candidate Confirmed:** Propensity profile meets confidence thresholds ({conversion_probability:.1f}% score). Recommended action: Prioritize for standard retention and outbound outreach campaigns.")
-            else:
-                st.warning(f"📉 **Low-Yield Target Prospect Identified:** Customer parameters indicate suboptimal alignment with conversion patterns ({conversion_probability:.1f}% score). Recommended action: Conserve marketing resources or pair with premium discount options.")
-                
-        except Exception as pipeline_fault:
-            st.error(f"Operational pipeline execution fault: {pipeline_fault}")
-            st.info("Verify numerical format values match production settings.")
-
-# =============================================================
-# TAB 2: EXPLORATION INSIGHTS & DISTRIBUTION PROFILE
-# =============================================================
-with tab_analytics:
-    st.subheader("Data Profiles & Feature Spaces")
-    st.markdown("Review downstream engineering metrics, distribution checks, and feature array shapes mapped directly from training.")
     
-    sub1, sub2, sub3 = st.columns(3)
-    with sub1:
-        st.metric(label="Model Matrix Feature Vector Shapes", value=f"{len(model_cols)} Columns")
-    with sub2:
-        st.metric(label="Calculated Model Architecture Target", value=type(model).__name__)
-    with sub3:
-        st.metric(label="Core Pipeline State", value="Fitted & Hot-Loaded")
+    
         
-    st.markdown("---")
-    st.markdown("#### Expected Target Distribution Check (Reference Metrics)")
-    
-    # Build beautiful analytical benchmark visual comparisons for professional tracking
-    mock_distribution_data = pd.DataFrame({
-        'Response Outcome Class': ['Not Interested (0)', 'Interested (1)'],
-        'Historical Base Share (%)': [87.8, 12.2]
-    }).set_index('Response Outcome Class')
-    
-    st.bar_chart(mock_distribution_data)
-    
-    with st.expander("🔍 Advanced Debugging: View Encoded Matrix Array Schema"):
-        st.dataframe(pd.Series(model_cols, name="Registered Input Vector Columns Address Key"))
