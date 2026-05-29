@@ -167,8 +167,7 @@ with tab_scoring:
         # 5. Execute Prediction & Probabilities
         prediction = model.predict(final_model_input)[0]
         probability = model.predict_proba(final_model_input)[0][1]
-        
-        # 6. UI Output Presentation
+                # 6. UI Output Presentation
         st.markdown("---")
         if prediction == 1:
             st.success(f"🎉 **High Propensity!** This customer is highly likely to purchase Vehicle Insurance. (Confidence Score: {probability:.1%})")
