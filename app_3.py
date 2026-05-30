@@ -31,7 +31,7 @@ st.markdown("""
         color: #6c757d;
     }
 </style>
-""", unsafe_scale=True)
+""", unsafe_allow_html=True)
 
 # Application Heading & Description
 st.title("🚗 Vehicle Insurance Cross-Sell Analyzer")
