@@ -57,7 +57,7 @@ if artifacts is None:
 model = artifacts['model']
 OHE = artifacts['cat_encode']
 Scaler = artifacts['num_encode']
-model_cols = artifacts['columns']
+model_cols = artifacts['model_columns']
 
 # Create Top-level Tabs similar to your friend's structure
 tab_predict, tab_insights = st.tabs(["🔮 Single Customer Prediction", "📊 Model Configuration & Insights"])
